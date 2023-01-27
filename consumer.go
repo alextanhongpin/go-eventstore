@@ -67,11 +67,7 @@ func main() {
 				panic("unhandled event")
 			}
 
-			// NOTE: Every event must be acknowledged.
-			// Acknowledging the events that appears later does
-			// not automatically acknowledge the earlier events.
-			// If the event is not acknowledge, it may be
-			// replayed again, but out of order.
+			// Acknowledge the event to increment the offset.
 			if err := sub.Ack(event.EventAppeared.Event); err != nil {
 				log.Fatal("failed to ack event:", err)
 			}
