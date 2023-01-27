@@ -70,6 +70,7 @@ func main() {
 		Direction: esdb.Forwards,
 	}, 10)
 	if err != nil {
+		// NOTE: We can't check for stream not found here.
 		log.Fatal("failed to read stream:", err)
 	}
 	defer stream.Close()
@@ -120,6 +121,7 @@ func lastStreamRevision(ctx context.Context, db *esdb.Client, streamName string)
 		fmt.Println("EOF", err)
 		return esdb.NoStream{}, nil
 	}
+
 	if err != nil {
 		var esdbErr *esdb.Error
 		if errors.As(err, &esdbErr) {

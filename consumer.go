@@ -32,7 +32,7 @@ func main() {
 	}
 	defer db.Close()
 
-	if err := createPersistentSubscription(db, streamName, groupName); err != nil {
+	if err := upsertPersistentSubscription(db, streamName, groupName); err != nil {
 		log.Fatal("failed to create persistent subscription:", err)
 	}
 
@@ -78,7 +78,7 @@ func main() {
 	}
 }
 
-func createPersistentSubscription(client *esdb.Client, streamName, groupName string) error {
+func upsertPersistentSubscription(client *esdb.Client, streamName, groupName string) error {
 	ctx := context.Background()
 	options := esdb.PersistentStreamSubscriptionOptions{
 		StartFrom: esdb.Start{},
