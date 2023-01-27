@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -20,6 +21,10 @@ type TestEvent struct {
 }
 
 func main() {
+	var message string
+	flag.StringVar(&message, "msg", "TestEvent", "event message")
+	flag.Parse()
+
 	settings, err := esdb.ParseConnectionString("esdb://localhost:2113?tls=false")
 	if err != nil {
 		log.Fatal("failed to parse connection string:", err)
@@ -33,7 +38,7 @@ func main() {
 
 	testEvent := TestEvent{
 		ID:      uuid.New().String(),
-		Message: "My first event",
+		Message: message,
 	}
 	data, err := json.Marshal(testEvent)
 	if err != nil {
@@ -51,6 +56,11 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("last revision is", revision)
+
+	// NOTE: We can test optimistic concurrency by running the producer.go twice.
+	// This will attempt an insert with the same revision, and hence failing the
+	// second (or subsequent) append.
+	//time.Sleep(5 * time.Second)
 
 	// For the first event, use `NO_STREAM` as the expected revision.
 	result, err := db.AppendToStream(context.Background(), streamName, esdb.AppendToStreamOptions{

@@ -37,7 +37,9 @@ func main() {
 	}
 
 	ctx := context.Background()
-	sub, err := db.SubscribeToPersistentSubscription(ctx, streamName, groupName, esdb.SubscribeToPersistentSubscriptionOptions{})
+	sub, err := db.SubscribeToPersistentSubscription(ctx, streamName, groupName, esdb.SubscribeToPersistentSubscriptionOptions{
+		RequiresLeader: true,
+	})
 	if err != nil {
 		log.Fatal("failed to connect to persistent subscription:", err)
 	}
@@ -65,7 +67,11 @@ func main() {
 				panic("unhandled event")
 			}
 
-			// Acknowledge the event to increment the offset.
+			// NOTE: Every event must be acknowledged.
+			// Acknowledging the events that appears later does
+			// not automatically acknowledge the earlier events.
+			// If the event is not acknowledge, it may be
+			// replayed again, but out of order.
 			if err := sub.Ack(event.EventAppeared.Event); err != nil {
 				log.Fatal("failed to ack event:", err)
 			}
